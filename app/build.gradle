@@ -1,6 +1,9 @@
 plugins {
     id 'application'
+    id 'org.springframework.boot' version '2.6.5'
 }
+
+apply plugin: 'io.spring.dependency-management'
 
 repositories {
     mavenLocal()
@@ -8,7 +11,6 @@ repositories {
 }
 
 dependencies {
-    implementation platform('org.springframework.boot:spring-boot-dependencies:2.6.5')
     implementation('org.springframework.boot:spring-boot-starter-batch')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
