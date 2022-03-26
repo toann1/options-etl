@@ -14,7 +14,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'com.toanknguyen.optionsetl.App'
+    mainClass = 'com.toanknguyen.optionsetl.Application'
 }
 
 tasks.named('test') {
