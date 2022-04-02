@@ -2,7 +2,7 @@
 logging:
   level:
     root: ERROR
-    com.toanknguyen.optionsetl: INFO
+    com.toanknguyen.optionsetl: DEBUG
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
@@ -10,4 +10,7 @@ spring:
     password: postgres
 optionsetl:
   test: testvalue
+  source:
+    directory: .
+    pattern: '*.csv'
 ...

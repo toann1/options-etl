@@ -5,13 +5,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
+import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
-    private final Logger logger = LoggerFactory.getLogger(BatchConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(BatchConfiguration.class);
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -20,5 +28,17 @@ public class BatchConfiguration {
     public BatchConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
+    }
+
+    @Bean
+    public ItemReader<String> sourceFileDiscoveryReader(
+            @Value("${optionsetl.source.directory}/${optionsetl.source.pattern}") String sourceFilePathPattern
+    ) throws IOException {
+        logger.debug("sourceFilePathPattern: {}", sourceFilePathPattern);
+        return new MultiResourceItemReaderBuilder<String>()
+                .name("source-file-discovery-reader")
+                .resources(new PathMatchingResourcePatternResolver().getResources(sourceFilePathPattern))
+                .delegate(new FlatFileItemReader<>())
+                .build();
     }
 }
