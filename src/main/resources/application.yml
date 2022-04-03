@@ -4,12 +4,14 @@ logging:
     root: ERROR
     com.toanknguyen.optionsetl: DEBUG
 spring:
+  batch:
+    jdbc:
+      initialize-schema: always
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
 optionsetl:
-  test: testvalue
   source:
     directory: .
     pattern: '*.csv'

@@ -1,12 +1,17 @@
 package com.toanknguyen.optionsetl.batch.config;
 
+import com.toanknguyen.optionsetl.batch.discovery.reader.FileNameItemReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +23,7 @@ import java.io.IOException;
 
 @Configuration
 @EnableBatchProcessing
-public class BatchConfiguration {
+public class BatchConfiguration extends DefaultBatchConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(BatchConfiguration.class);
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -32,13 +37,36 @@ public class BatchConfiguration {
 
     @Bean
     public ItemReader<String> sourceFileDiscoveryReader(
-            @Value("${optionsetl.source.directory}/${optionsetl.source.pattern}") String sourceFilePathPattern
+            @Value("file:${optionsetl.source.directory}/${optionsetl.source.pattern}") String sourceFilePathPattern
     ) throws IOException {
         logger.debug("sourceFilePathPattern: {}", sourceFilePathPattern);
         return new MultiResourceItemReaderBuilder<String>()
-                .name("source-file-discovery-reader")
+                .name("sourceFileDiscoveryReader")
                 .resources(new PathMatchingResourcePatternResolver().getResources(sourceFilePathPattern))
-                .delegate(new FlatFileItemReader<>())
+                .delegate(new FileNameItemReader())
+                .build();
+    }
+
+    @Bean
+    public Job discoverFilesJob(Step discoverFilesStep) {
+        logger.trace("discover files job");
+        return jobBuilderFactory.get("discoverFilesJob")
+                .incrementer(new RunIdIncrementer())
+                .flow(discoverFilesStep)
+                .end()
+                .build();
+    }
+
+    @Bean
+    public Step discoverFilesStep(
+            ItemReader<String> sourceFileDiscoveryReader,
+            ItemWriter<String> sourceFileDiscoveryWriter
+    ) {
+        logger.trace("discover files step");
+        return stepBuilderFactory.get("discoverFilesStep")
+                .<String, String> chunk(1000)
+                .reader(sourceFileDiscoveryReader)
+                .writer(sourceFileDiscoveryWriter)
                 .build();
     }
 }
