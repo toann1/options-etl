@@ -3,7 +3,9 @@ package com.toanknguyen.optionsetl.batch.discovery.reader;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FileNameItemReader implements ResourceAwareItemReaderItemStream<String> {
     private Resource resource;
     private boolean isRead;
