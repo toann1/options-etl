@@ -12,13 +12,17 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.builder.MultiResourceItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 
 @Configuration
@@ -44,6 +48,19 @@ public class BatchConfiguration extends DefaultBatchConfigurer {
                 .name("sourceFileDiscoveryReader")
                 .resources(new PathMatchingResourcePatternResolver().getResources(sourceFilePathPattern))
                 .delegate(new FileNameItemReader())
+                .build();
+    }
+
+    @Bean
+    public ItemWriter<String> sourceFileDiscoveryWriter(
+            DataSource dataSource
+    ) {
+        logger.trace("sourceFileDiscoveryWriter");
+        return new JdbcBatchItemWriterBuilder<String>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO processed_files (file_name) VALUES (:fileName) ON CONFLICT DO NOTHING;")
+                .itemSqlParameterSourceProvider(fn -> new MapSqlParameterSource().addValue("fileName", fn))
+                .assertUpdates(false)
                 .build();
     }
 
