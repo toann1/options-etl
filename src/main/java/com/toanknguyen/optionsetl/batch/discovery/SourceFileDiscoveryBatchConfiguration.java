@@ -1,6 +1,5 @@
 package com.toanknguyen.optionsetl.batch.discovery;
 
-import com.toanknguyen.optionsetl.batch.config.BatchConfiguration;
 import com.toanknguyen.optionsetl.batch.discovery.reader.FileNameItemReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
